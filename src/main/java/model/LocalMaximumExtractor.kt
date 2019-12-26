@@ -4,7 +4,18 @@ import util.RGBImageArrayProxy
 
 class LocalMaximumExtractor {
 
+    lateinit var extremumPoints: Array<Array<Array<Array<Boolean>>>>
+
     fun extractMaximumValues(differences: Array<Array<RGBImageArrayProxy>>) {
+        extremumPoints = Array(differences.size) { octave ->
+            Array(differences[octave].size) { scale ->
+                Array(differences[octave][scale].width) {
+                    Array(differences[octave][scale].height) {
+                        false
+                    }
+                }
+            }
+        }
         for (octave in differences.indices) {
             for (scale in 1 until differences[octave].size - 1) {
                 for (scanX in 0 until differences[octave][scale].width) {
@@ -40,6 +51,9 @@ class LocalMaximumExtractor {
                                     }
                                 }
                             }
+                        }
+                        if (isExtremum) {
+                            //mark
                         }
                     }
                 }
