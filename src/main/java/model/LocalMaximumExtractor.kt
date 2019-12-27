@@ -6,11 +6,11 @@ class LocalMaximumExtractor {
 
     lateinit var extremumPoints: Array<Array<Array<Array<Boolean>>>>
 
-    fun extractMaximumValues(differences: Array<Array<RGBImageArrayProxy>>) {
+    fun extractMaximumValues(differences: Array<Array<RGBImageArrayProxy?>>): Array<Array<Array<Array<Boolean>>>> {
         extremumPoints = Array(differences.size) { octave ->
             Array(differences[octave].size) { scale ->
-                Array(differences[octave][scale].width) {
-                    Array(differences[octave][scale].height) {
+                Array(differences[octave][scale]!!.width) {
+                    Array(differences[octave][scale]!!.height) {
                         false
                     }
                 }
@@ -18,8 +18,8 @@ class LocalMaximumExtractor {
         }
         for (octave in differences.indices) {
             for (scale in 1 until differences[octave].size - 1) {
-                for (scanX in 0 until differences[octave][scale].width) {
-                    for (scanY in 0 until differences[octave][scale].height) {
+                for (scanX in 1 until differences[octave][scale]!!.width - 1) {
+                    for (scanY in 1 until differences[octave][scale]!!.height - 1) {
 
                         var leastVal = 255
                         var greatestVal = 0
@@ -36,13 +36,13 @@ class LocalMaximumExtractor {
                                     continue
                                 }
                                 for (probeDepth in scale - 1..scale + 1) {
-                                    val neighbourPixelColor = differences[octave][probeDepth][probeX, probeY][0]
-                                    val scanPixelColor = differences[octave][scale][scanX, scanY][0]
+                                    val neighbourPixelColor = differences[octave][probeDepth]!![probeX, probeY][0]
+                                    val scanPixelColor = differences[octave][scale]!![scanX, scanY][0]
                                     if (neighbourPixelColor < leastVal) {
                                         leastVal = neighbourPixelColor
                                     }
                                     if (neighbourPixelColor > greatestVal) {
-                                        leastVal = neighbourPixelColor
+                                        greatestVal = neighbourPixelColor
                                     }
                                     if (scanPixelColor in (leastVal + 1) until greatestVal) {
                                         //can no longer be an extremum discard
@@ -53,11 +53,13 @@ class LocalMaximumExtractor {
                             }
                         }
                         if (isExtremum) {
-                            //mark
+                            extremumPoints[octave][scale][scanX][scanY] = true
                         }
                     }
                 }
             }
         }
+        println("max extraction done")
+        return extremumPoints
     }
 }

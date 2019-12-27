@@ -5,8 +5,8 @@ import imageProcessing.implementation.Scale
 import imageProcessing.implementation.Subtract
 import util.RGBImageArrayProxy
 import visualization.Visualization
+import kotlin.math.pow
 import kotlin.math.sqrt
-
 
 
 class DifferenceOfGaussians(private val startSigma: Double = 1.6,
@@ -23,12 +23,12 @@ class DifferenceOfGaussians(private val startSigma: Double = 1.6,
     }
 
 
-    fun calculateGaussianPyramid(input: RGBImageArrayProxy) : Array<Array<RGBImageArrayProxy?>> {
+    fun calculateGaussianPyramid(input: RGBImageArrayProxy): Array<Array<RGBImageArrayProxy?>> {
         var currentScale = 1.0
         for (octave in 0 until numberOfOctaves) {
             for (scale in 0 until numberOfScaleLevels) {
-                val currentSigma = startSigma * k * (scale + 1)
-                octaves[octave][scale] = GaussianBlur(currentSigma, 16).process(Scale(currentScale).process(input))
+                val currentSigma = (startSigma * (2.0.pow(1.0 / numberOfScaleLevels))) * (scale + 1)
+                octaves[octave][scale] = GaussianBlur(currentSigma, (6 * currentSigma).toInt()).process(Scale(currentScale).process(input))
                 Visualization().showImage(octaves[octave][scale]!!.bufferedImage)
             }
             currentScale *= 0.5
