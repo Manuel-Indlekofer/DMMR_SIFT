@@ -3,6 +3,7 @@ import imageProcessing.implementation.GaussianBlur
 import imageProcessing.implementation.Subtract
 import model.DifferenceOfGaussians
 import model.LocalMaximumExtractor
+import model.MaximumSubpixelEnhancer
 import org.apache.commons.math3.linear.MatrixUtils
 import util.RGBImageArrayProxy
 import visualization.Visualization
@@ -33,4 +34,5 @@ fun main() {
             Visualization().showImage(gaussianPyramid[octave][scale]!!.bufferedImage)
         }
     }
+    MaximumSubpixelEnhancer(gaussianPyramid as Array<Array<RGBImageArrayProxy>>,result).process()
 }

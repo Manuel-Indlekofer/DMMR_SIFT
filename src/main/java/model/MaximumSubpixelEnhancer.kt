@@ -5,6 +5,22 @@ import util.RGBImageArrayProxy
 
 class MaximumSubpixelEnhancer(private val doGPyramid: Array<Array<RGBImageArrayProxy>>, private val extremumPoints: Array<Array<Array<Array<Boolean>>>>) {
 
+
+    fun process() {
+        for (octave in extremumPoints.indices) {
+            for (scale in extremumPoints[octave].indices) {
+                for (x in extremumPoints[octave][scale].indices) {
+                    for (y in extremumPoints[octave][scale][x].indices) {
+                        if(extremumPoints[octave][scale][x][y]){
+                            calculateOffset(x,y,octave,scale)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     private fun calculateOffset(x: Int, y: Int, octave: Int, scale: Int) {
         val dx = (doGPyramid[octave][scale][x + 1, y][0] - doGPyramid[octave][scale][x - 1, y][0]) / 2.0
         val dy = (doGPyramid[octave][scale][x, y + 1][0] - doGPyramid[octave][scale][x, y - 1][0]) / 2.0
@@ -26,7 +42,11 @@ class MaximumSubpixelEnhancer(private val doGPyramid: Array<Array<RGBImageArrayP
                 doubleArrayOf(dxy, dyy, dys),
                 doubleArrayOf(dxs, dys, dss)))
 
+        if(hesse.determinant == 0.0){
+            return
+        }
         val offset = (hesse.inverse * jacobi)
+        println(offset.toString())
     }
 
 }

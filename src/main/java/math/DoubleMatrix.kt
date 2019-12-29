@@ -32,6 +32,11 @@ class DoubleMatrix {
             return result
         }
 
+    val determinant: Double
+        get() {
+            return LUDecomposition(matrix).determinant
+        }
+
     val inverse: DoubleMatrix
         get() {
             val inverseData = LUDecomposition(matrix).solver.inverse
@@ -91,7 +96,7 @@ class DoubleMatrix {
                     numberIndex == 0 -> {
                         "[$number, "
                     }
-                    lineIndex == matrix.rowDimension - 1 -> {
+                    numberIndex == matrix.columnDimension - 1 -> {
                         if (lineIndex == matrix.rowDimension - 1) {
                             "$number]"
                         } else {
