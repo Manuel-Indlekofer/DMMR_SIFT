@@ -1,6 +1,4 @@
 import math.GaussianProvider
-import math.Matrix3d
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 

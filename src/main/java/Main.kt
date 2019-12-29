@@ -3,13 +3,14 @@ import imageProcessing.implementation.GaussianBlur
 import imageProcessing.implementation.Subtract
 import model.DifferenceOfGaussians
 import model.LocalMaximumExtractor
+import org.apache.commons.math3.linear.MatrixUtils
 import util.RGBImageArrayProxy
 import visualization.Visualization
 import java.io.File
 
 fun main() {
 
-    val image = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg"))
+    val image = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test2.jpg"))
     val bnw = BlackAndWhite().process(image)
 
     val gaussianPyramid = DifferenceOfGaussians().calculateGaussianPyramid(bnw)

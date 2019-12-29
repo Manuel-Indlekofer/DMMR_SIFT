@@ -1,25 +1,24 @@
 package imageProcessing.implementation
 
 import imageProcessing.ImageProcessor
-import math.Matrix3d
+import math.DoubleMatrix
 import util.RGBImageArrayProxy
 import java.awt.image.BufferedImage
-import kotlin.math.sign
 
-open class Convolution(private val convolutionMatrix: Matrix3d) : ImageProcessor {
+open class Convolution(private val convolutionMatrix: DoubleMatrix) : ImageProcessor {
 
 
     override fun process(input: RGBImageArrayProxy): RGBImageArrayProxy {
         val outputImage = RGBImageArrayProxy(BufferedImage(input.width, input.height, BufferedImage.TYPE_INT_RGB))
         for (pivotX in 0 until input.width) {
             for (pivotY in 0 until input.height) {
-                val sourceMatrix3d = Matrix3d(convolutionMatrix.size)
+                val sourceMatrix3d = DoubleMatrix(convolutionMatrix.rows, convolutionMatrix.columns)
 
 
-                for (x in 0 until sourceMatrix3d.size) {
-                    for (y in 0 until sourceMatrix3d.size) {
-                        var targetX = pivotX + (x - convolutionMatrix.size / 2)
-                        var targetY = pivotY + (y - convolutionMatrix.size / 2)
+                for (x in 0 until sourceMatrix3d.columns) {
+                    for (y in 0 until sourceMatrix3d.rows) {
+                        var targetX = pivotX + (x - convolutionMatrix.columns / 2)
+                        var targetY = pivotY + (y - convolutionMatrix.rows / 2)
 
                         if (targetX < 0) {
                             targetX = 0
