@@ -1,5 +1,6 @@
 package math
 
+import org.apache.commons.math3.linear.EigenDecomposition
 import org.apache.commons.math3.linear.LUDecomposition
 import org.apache.commons.math3.linear.MatrixUtils
 import org.apache.commons.math3.linear.RealMatrix
@@ -15,10 +16,19 @@ class DoubleMatrix {
         get() {
             return matrix.columnDimension
         }
+    val trace: Double
+        get() {
+            return matrix.trace
+        }
 
     val rows: Int
         get() {
             return matrix.rowDimension
+        }
+
+    val eigenvalues: DoubleArray
+        get() {
+            return EigenDecomposition(matrix).realEigenvalues
         }
 
     val sum: Double
@@ -30,6 +40,11 @@ class DoubleMatrix {
                 }
             }
             return result
+        }
+
+    val transposed: DoubleMatrix
+        get() {
+            return DoubleMatrix(matrix.copy().transpose())
         }
 
     val determinant: Double
@@ -85,6 +100,9 @@ class DoubleMatrix {
         return result
     }
 
+    fun getSubMatrix(startRow: Int, endRow: Int, startCol: Int, endCol: Int): DoubleMatrix {
+        return DoubleMatrix(matrix.getSubMatrix(startRow, endRow, startCol, endCol))
+    }
 
     override fun toString(): String {
         val output: StringBuilder = StringBuilder("[")

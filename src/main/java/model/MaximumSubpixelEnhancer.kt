@@ -1,18 +1,24 @@
 package model
 
 import math.DoubleMatrix
+import org.apache.commons.math3.linear.LUDecomposition
 import util.RGBImageArrayProxy
+import java.lang.Math.pow
+import kotlin.math.pow
 
 class MaximumSubpixelEnhancer(private val doGPyramid: Array<Array<RGBImageArrayProxy>>, private val extremumPoints: Array<Array<Array<Array<Boolean>>>>) {
 
+    companion object {
+        const val CONTRAST_DISCARD_THRESHOLD = 0.00
+    }
 
     fun process() {
         for (octave in extremumPoints.indices) {
             for (scale in extremumPoints[octave].indices) {
                 for (x in extremumPoints[octave][scale].indices) {
                     for (y in extremumPoints[octave][scale][x].indices) {
-                        if(extremumPoints[octave][scale][x][y]){
-                            calculateOffset(x,y,octave,scale)
+                        if (extremumPoints[octave][scale][x][y]) {
+                            calculateOffset(x, y, octave, scale)
                         }
                     }
                 }
@@ -42,11 +48,22 @@ class MaximumSubpixelEnhancer(private val doGPyramid: Array<Array<RGBImageArrayP
                 doubleArrayOf(dxy, dyy, dys),
                 doubleArrayOf(dxs, dys, dss)))
 
-        if(hesse.determinant == 0.0){
+        if (hesse.determinant == 0.0) {
             return
         }
         val offset = (hesse.inverse * jacobi)
-        println(offset.toString())
+        val subpixelContrast = doGPyramid[octave][scale][x, y][0] + 0.5 * (jacobi.transposed * offset)[0, 0]
+        if (subpixelContrast < CONTRAST_DISCARD_THRESHOLD) {
+            extremumPoints[octave][scale][x][y] = false
+            return
+        }
+
+        val hesseWithoutScale = hesse.getSubMatrix(0, 2, 0, 2)
+        val ratio = hesseWithoutScale.trace.pow(2.0) / hesseWithoutScale.determinant
+        if (ratio > 12.1) {
+            extremumPoints[octave][scale][x][y] = false
+            return
+        }
     }
 
 }

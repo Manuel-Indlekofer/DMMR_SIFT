@@ -23,36 +23,25 @@ class LocalMaximumExtractor {
 
                         var leastVal = 255
                         var greatestVal = 0
-                        var isExtremum = true
+                        val scanPixelColor = differences[octave][scale]!![scanX, scanY][0]
                         for (probeX in scanX - 1..scanX + 1) {
-                            if (!isExtremum) {
-                                break
-                            }
                             for (probeY in scanY - 1..scanY + 1) {
-                                if (!isExtremum) {
-                                    break
-                                }
-                                if (probeX == scanX && probeX == scanY) {
+
+                                if (probeX == scanX && probeY == scanY) {
                                     continue
                                 }
                                 for (probeDepth in scale - 1..scale + 1) {
                                     val neighbourPixelColor = differences[octave][probeDepth]!![probeX, probeY][0]
-                                    val scanPixelColor = differences[octave][scale]!![scanX, scanY][0]
                                     if (neighbourPixelColor < leastVal) {
                                         leastVal = neighbourPixelColor
                                     }
                                     if (neighbourPixelColor > greatestVal) {
                                         greatestVal = neighbourPixelColor
                                     }
-                                    if (scanPixelColor in (leastVal + 1) until greatestVal) {
-                                        //can no longer be an extremum discard
-                                        isExtremum = false
-                                        break
-                                    }
                                 }
                             }
                         }
-                        if (isExtremum) {
+                        if (scanPixelColor < leastVal || scanPixelColor > greatestVal) {
                             extremumPoints[octave][scale][scanX][scanY] = true
                         }
                     }

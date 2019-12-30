@@ -11,11 +11,12 @@ import java.io.File
 
 fun main() {
 
-    val image = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test2.jpg"))
+    val image = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg"))
     val bnw = BlackAndWhite().process(image)
 
     val gaussianPyramid = DifferenceOfGaussians().calculateGaussianPyramid(bnw)
     val result = LocalMaximumExtractor().extractMaximumValues(gaussianPyramid)
+    MaximumSubpixelEnhancer(gaussianPyramid as Array<Array<RGBImageArrayProxy>>, result).process()
 
     for (octave in result.indices) {
         for (scale in result[octave].indices) {
@@ -29,10 +30,9 @@ fun main() {
         }
     }
 
-    for(octave in gaussianPyramid.indices){
-        for(scale in gaussianPyramid.indices){
+    for (octave in gaussianPyramid.indices) {
+        for (scale in gaussianPyramid.indices) {
             Visualization().showImage(gaussianPyramid[octave][scale]!!.bufferedImage)
         }
     }
-    MaximumSubpixelEnhancer(gaussianPyramid as Array<Array<RGBImageArrayProxy>>,result).process()
 }
