@@ -8,10 +8,10 @@ import java.awt.image.BufferedImage
 open class Convolution(private val convolutionMatrix: DoubleMatrix) : ImageProcessor {
 
 
-    override fun process(input: RGBImageArrayProxy): RGBImageArrayProxy {
-        val outputImage = RGBImageArrayProxy(BufferedImage(input.width, input.height, BufferedImage.TYPE_INT_RGB))
-        for (pivotX in 0 until input.width) {
-            for (pivotY in 0 until input.height) {
+    override fun process(input: DoubleMatrix): DoubleMatrix {
+        val outputMatrix = DoubleMatrix(input.rows, input.columns)
+        for (pivotX in 0 until input.columns) {
+            for (pivotY in 0 until input.rows) {
                 val sourceMatrix3d = DoubleMatrix(convolutionMatrix.rows, convolutionMatrix.columns)
 
 
@@ -22,25 +22,28 @@ open class Convolution(private val convolutionMatrix: DoubleMatrix) : ImageProce
 
                         if (targetX < 0) {
                             targetX = 0
-                        } else if (targetX > input.width - 1) {
-                            targetX = input.width - 1
+                        } else if (targetX > input.columns - 1) {
+                            targetX = input.columns - 1
                         }
 
                         if (targetY < 0) {
                             targetY = 0
-                        } else if (targetY > input.height - 1) {
-                            targetY = input.height - 1
+                        } else if (targetY > input.rows - 1) {
+                            targetY = input.rows - 1
                         }
-                        sourceMatrix3d[x, y] = input.bufferedImage.raster.getPixel(targetX, targetY, IntArray(3))[0].toDouble()
+                        sourceMatrix3d[x, y] = input[targetX, targetY]
                     }
                 }
 
-                outputImage[pivotX, pivotY] = IntArray(3) {
-                    sourceMatrix3d.timesComponentWise(convolutionMatrix).sum.toInt() % 255
-                }
+                val sum = sourceMatrix3d.timesComponentWise(convolutionMatrix).sum
+                if (sum > 1.0) {
 
+                    outputMatrix[pivotX, pivotY] = 1.0
+                } else {
+                    outputMatrix[pivotX, pivotY] = sum
+                }
             }
         }
-        return outputImage
+        return outputMatrix
     }
 }

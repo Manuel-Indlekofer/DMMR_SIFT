@@ -83,11 +83,11 @@ class DoubleMatrix {
     }
 
     operator fun get(i: Int, j: Int): Double {
-        return matrix.getEntry(i, j)
+        return matrix.getEntry(j, i)
     }
 
     operator fun set(i: Int, j: Int, value: Double) {
-        matrix.setEntry(i, j, value)
+        matrix.setEntry(j, i, value)
     }
 
     fun timesComponentWise(second: DoubleMatrix): DoubleMatrix {

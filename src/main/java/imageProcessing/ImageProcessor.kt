@@ -1,9 +1,9 @@
 package imageProcessing
 
-import util.RGBImageArrayProxy
+import math.DoubleMatrix
 
 interface ImageProcessor {
 
-    fun process(input: RGBImageArrayProxy): RGBImageArrayProxy
+    fun process(input: DoubleMatrix): DoubleMatrix
 
 }
