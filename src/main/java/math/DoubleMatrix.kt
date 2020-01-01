@@ -16,6 +16,11 @@ class DoubleMatrix {
         get() {
             return matrix.columnDimension
         }
+
+    val copy: DoubleMatrix
+        get() {
+            return DoubleMatrix(matrix.copy())
+        }
     val trace: Double
         get() {
             return matrix.trace
