@@ -1,8 +1,7 @@
-import imageProcessing.implementation.DownSampler
 import imageProcessing.implementation.Normalizer
-import model.DifferenceOfGaussians
+import model.DifferenceOfGaussiansPyramidBuilder
 import model.LocalMaximumExtractor
-import model.MaximumSubpixelEnhancer
+import model.KeypointSubpixelExtractor
 import util.RGBImageArrayProxy
 import visualization.Visualization
 import java.io.File
@@ -11,9 +10,10 @@ fun main() {
 
     val image = Normalizer.normalizeImage(RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg")))
 
-    val gaussianPyramid = DifferenceOfGaussians().calculateGaussianPyramid(image)
+    val gaussianPyramidBuilder = DifferenceOfGaussiansPyramidBuilder()
+    val gaussianPyramid = gaussianPyramidBuilder.calculateGaussianPyramid(image)
     val result = LocalMaximumExtractor().extractMaximumValues(gaussianPyramid)
-    MaximumSubpixelEnhancer(gaussianPyramid, result).process()
+    KeypointSubpixelExtractor(gaussianPyramid, result, gaussianPyramidBuilder.sigmaLevels).process()
 
     for (octave in result.indices) {
         for (scale in result[octave].indices) {

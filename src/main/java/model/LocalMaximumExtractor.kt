@@ -1,7 +1,6 @@
 package model
 
 import math.DoubleMatrix
-import util.RGBImageArrayProxy
 
 class LocalMaximumExtractor {
 
