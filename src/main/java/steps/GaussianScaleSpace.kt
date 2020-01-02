@@ -8,18 +8,17 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 
-class GaussianScaleSpace(private val numberOfOctaves: Int = 5,
-                         private val numberOfScales: Int = 5,
-                         private val minBlurSigma: Double = 0.8,
-                         private val minInterPixelDistance: Double = 0.5,
-                         private val initialBlur: Double = 0.5
+class GaussianScaleSpace(val numberOfOctaves: Int = 5,
+                         val numberOfScales: Int = 5,
+                         val minBlurSigma: Double = 0.8,
+                         val minInterPixelDistance: Double = 0.5,
+                         val initialBlur: Double = 0.5
 ) : Step<DoubleMatrix, GaussianPyramid> {
     override fun process(input: DoubleMatrix): GaussianPyramid {
         val gaussianPyramid = GaussianPyramid(numberOfOctaves, numberOfScales + 2)
         val seedImage = BilinearInterpolation.interpolate(input, minInterPixelDistance)
         val initialBlur = 1.0 / minInterPixelDistance * sqrt(minBlurSigma.pow(2) - initialBlur.pow(2))
         println(initialBlur)
-        val seedImageBlurred = GaussianBlur(initialBlur, (initialBlur * 8).toInt()).process(seedImage)
         gaussianPyramid.setImage(0, 0, seedImage)
 
         for (scale in 1 until numberOfScales + 2) {

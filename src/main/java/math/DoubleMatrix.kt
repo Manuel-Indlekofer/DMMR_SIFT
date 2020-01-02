@@ -87,6 +87,10 @@ class DoubleMatrix {
         return DoubleMatrix(matrix.preMultiply(second.matrix))
     }
 
+    operator fun unaryMinus(): DoubleMatrix {
+        return DoubleMatrix(matrix.scalarMultiply(-1.0))
+    }
+
     operator fun get(i: Int, j: Int): Double {
         return matrix.getEntry(j, i)
     }

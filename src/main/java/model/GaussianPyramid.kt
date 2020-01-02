@@ -2,12 +2,16 @@ package model
 
 import math.DoubleMatrix
 
-class GaussianPyramid(val numberOfOctaves: Int, val numberOfScales: Int) {
+open class GaussianPyramid(val numberOfOctaves: Int, val numberOfScales: Int) {
 
     private val pyramid: Array<Array<DoubleMatrix>> = Array(numberOfOctaves) {
         Array(numberOfScales) {
             DoubleMatrix(5, 5)
         }
+    }
+
+    private val deltas : Array<Double> = Array(numberOfOctaves){
+        0.0
     }
 
     fun getImage(octave: Int, scale: Int): DoubleMatrix {
@@ -26,4 +30,5 @@ class GaussianPyramid(val numberOfOctaves: Int, val numberOfScales: Int) {
         }
     }
 
+    class DifferenceOfGaussiansPyramid(numberOfOctaves: Int, numberOfScales: Int) : GaussianPyramid(numberOfOctaves, numberOfScales)
 }

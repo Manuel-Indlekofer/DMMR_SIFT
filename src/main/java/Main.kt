@@ -3,7 +3,7 @@ import math.BilinearInterpolation
 import model.DifferenceOfGaussiansPyramidBuilder
 import model.LocalMaximumExtractor
 import model.KeypointSubpixelExtractor
-import steps.GaussianScaleSpace
+import steps.*
 import util.RGBImageArrayProxy
 import visualization.Visualization
 import java.io.File
@@ -11,11 +11,19 @@ import java.io.File
 fun main() {
 
     val image = Normalizer.normalizeImage(RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg")))
-    val gaussianPyramid = GaussianScaleSpace().process(image)
+    val scaleSpace = GaussianScaleSpace()
+    val gaussianPyramid = scaleSpace.process(image)
 
-    gaussianPyramid.forEach {
+    val dOG = DifferenceOfGaussians().process(gaussianPyramid)
+    dOG.forEach {
         Visualization().showImage(RGBImageArrayProxy(it).bufferedImage)
     }
+
+    val discreteExtrema = DiscreteExtremaExtraction().process(dOG)
+    val candidateKeypoints = SubPixelPrecisionExtractor(dOG, scaleSpace).process(discreteExtrema)
+
+    val keypoints = FilterCandidates(dOG).process(candidateKeypoints)
+
 
     /* val gaussianPyramidBuilder = DifferenceOfGaussiansPyramidBuilder()
      val gaussianPyramid = gaussianPyramidBuilder.calculateGaussianPyramid(image)
