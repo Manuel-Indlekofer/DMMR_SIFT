@@ -24,6 +24,16 @@ fun main() {
 
     val keypoints = FilterCandidates(dOG).process(candidateKeypoints)
 
+    val displayKeypoints = RGBImageArrayProxy(gaussianPyramid.getImage(0,0).copy)
+
+    keypoints.keypoints.filter {
+        it.octave == 0
+    }.forEach {
+        displayKeypoints[it.x,it.y] = intArrayOf(255,0,0)
+    }
+
+    Visualization().showImage(displayKeypoints.bufferedImage)
+
 
     /* val gaussianPyramidBuilder = DifferenceOfGaussiansPyramidBuilder()
      val gaussianPyramid = gaussianPyramidBuilder.calculateGaussianPyramid(image)
