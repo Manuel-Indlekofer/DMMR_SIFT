@@ -52,8 +52,15 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
     }
 
     private fun processKeypoint(keypoint: FilterCandidates.Keypoints.Keypoint): ArrayList<OrientedKeypoints.OrientedKeypoint>? {
-        if (!(3 * lambdaOrientation * keypoint.interpolatedScale <= keypoint.x && keypoint.x <= dOGPyramid.getImage(keypoint.octave, keypoint.scale).columns - 3.0 * lambdaOrientation * keypoint.interpolatedScale &&
-                        3 * lambdaOrientation * keypoint.interpolatedScale <= keypoint.y && keypoint.y <= dOGPyramid.getImage(keypoint.octave, keypoint.scale).rows - 3.0 * lambdaOrientation * keypoint.interpolatedScale)) {
+
+        val interPixelDistance = 0.5 * 2.0.pow(keypoint.octave)
+
+
+        val targetXRange = ((keypoint.interpolatedX - 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()..((keypoint.interpolatedX + 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()
+        val targetYRange = ((keypoint.interpolatedY - 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()..((keypoint.interpolatedY + 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()
+        val imageXRange = 0 until dOGPyramid.getImage(keypoint.octave, keypoint.scale).columns
+        val imageYRange = 0 until dOGPyramid.getImage(keypoint.octave, keypoint.scale).rows
+        if (targetXRange.first !in imageXRange || targetXRange.last !in imageXRange || targetYRange.first !in imageYRange || targetYRange.last !in imageYRange) {
             return null
         }
 
@@ -61,12 +68,18 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
             0.0
         }
 
-        val interPixelDistance = 0.5 * 2.0.pow(keypoint.octave)
-
-        for (x in ((keypoint.x - 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()..((keypoint.x + 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()) {
-            for (y in ((keypoint.y - 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()..((keypoint.y + 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()) {
+        for (x in targetXRange) {
+            for (y in targetYRange) {
+                println("x is $x")
+                println("y is $y")
+                println("interpolated x is ${keypoint.interpolatedX}")
+                println("interpolated y is ${keypoint.interpolatedY}")
+                println("keypoint y is ${keypoint.y}")
+                println("keypoint x is ${keypoint.x}")
+                println("imageX is ${dOGPyramid.getImage(keypoint.octave, keypoint.scale).columns}")
+                println("imageY is ${dOGPyramid.getImage(keypoint.octave, keypoint.scale).rows}")
                 val contribution = exp(-(sqrt((x * interPixelDistance - keypoint.x).pow(2.0) + (y * interPixelDistance - keypoint.y).pow(2.0)).pow(2.0) / 2 * (lambdaOrientation * keypoint.interpolatedScale).pow(2.0))) * sqrt(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0) + yGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0))
-                val binIndex = (numberOfBins.toDouble() / 2 * Math.PI * (atan2(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y), yGradient.getGradient(keypoint.octave, keypoint.scale, x, y)) % 2 * Math.PI)).roundToInt()
+                val binIndex = abs((numberOfBins.toDouble() / (2.0 * Math.PI)) * (atan2(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y), yGradient.getGradient(keypoint.octave, keypoint.scale, x, y))).rem(2.0 * Math.PI)).roundToInt()
                 orientationHistogram[binIndex] += contribution
             }
         }
@@ -76,8 +89,8 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
         val listOfKeypoints = ArrayList<OrientedKeypoints.OrientedKeypoint>()
 
         for (index in orientationHistogram.indices) {
-            val previousIndex = (index - 1) % orientationHistogram.size
-            val nextIndex = (index + 1) % orientationHistogram.size
+            val previousIndex = abs((index - 1).rem(orientationHistogram.size))
+            val nextIndex = abs((index + 1).rem(orientationHistogram.size))
             if (orientationHistogram[index] > orientationHistogram[previousIndex] && orientationHistogram[index] > orientationHistogram[nextIndex] && orientationHistogram[index] >= 0.8 * orientationHistogram.max()!!) {
                 val theta = 2 * Math.PI * index + Math.PI / numberOfBins * ((orientationHistogram[previousIndex] - orientationHistogram[nextIndex]) / (orientationHistogram[previousIndex] - 2.0 * orientationHistogram[index] + orientationHistogram[nextIndex]))
                 listOfKeypoints.add(OrientedKeypoints.OrientedKeypoint(keypoint.octave, keypoint.scale, keypoint.x, keypoint.y, keypoint.interpolatedScale, keypoint.interpolatedX, keypoint.interpolatedY, keypoint.interpolatedValue, theta))
@@ -92,9 +105,9 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
         for (iteration in 0 until 6) {
             val tempArray = histogram.copyOf()
             for (index in histogram.indices) {
-                val previousIndex = (index - 1) % histogram.size
-                val nextIndex = (index + 1) % histogram.size
-                histogram[index] = (histogram[previousIndex] + histogram[index] + histogram[nextIndex]) / 3.0
+                val previousIndex = abs((index - 1).rem(histogram.size))
+                val nextIndex = abs((index + 1).rem(histogram.size))
+                histogram[index] = (tempArray[previousIndex] + tempArray[index] + tempArray[nextIndex]) / 3.0
             }
         }
     }

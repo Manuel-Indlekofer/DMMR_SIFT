@@ -33,20 +33,19 @@ class SubPixelPrecisionExtractor(private val dOGPyramid: GaussianPyramid.Differe
         var currentY = extremum.y
         var alpha: DoubleMatrix
         var interpolatedValue: Double
-        val octaveSigma = 0.5 * 2.0.pow(extremum.octave)
+        val pixelDistance = 0.5 * 2.0.pow(extremum.octave)
         var interpolatedX: Double
         var interpolatedY: Double
         var interpolatedScale: Double
-        var failed = false
         do {
             iteration++
             alpha = calculateOffsetAlpha(DiscreteExtremaExtraction.DiscreteExtrema.Extremum(extremum.octave, currentScale, currentX, currentY))
             interpolatedValue = calculateInterpolatedValueOmega(DiscreteExtremaExtraction.DiscreteExtrema.Extremum(extremum.octave, currentScale, currentX, currentY))
 
 
-            interpolatedScale = octaveSigma / scaleSpace.minInterPixelDistance * scaleSpace.minBlurSigma * 2.0.pow((alpha[0, 0] + currentScale) / scaleSpace.numberOfScales)
-            interpolatedX = octaveSigma * (alpha[1, 0] + currentX)
-            interpolatedY = octaveSigma * (alpha[2, 0] + currentY)
+            interpolatedScale = pixelDistance / scaleSpace.minInterPixelDistance * scaleSpace.minBlurSigma * 2.0.pow((alpha[0, 0] + currentScale) / scaleSpace.numberOfScales)
+            interpolatedX = pixelDistance * (alpha[1, 0] + currentX)
+            interpolatedY = pixelDistance * (alpha[2, 0] + currentY)
 
             currentScale = (currentScale + alpha[0, 0]).roundToInt().coerceIn(1 until dOGPyramid.numberOfScales - 1)
             currentX = (currentX + alpha[1, 0]).roundToInt().coerceIn(1 until dOGPyramid.getImage(extremum.octave, currentScale).columns - 1)

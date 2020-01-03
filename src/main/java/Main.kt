@@ -24,6 +24,8 @@ fun main() {
 
     val keypoints = FilterCandidates(dOG).process(candidateKeypoints)
 
+    val orientedKeypoints = OrientationAssignment(dOG).process(keypoints)
+
     val displayKeypoints = RGBImageArrayProxy(gaussianPyramid.getImage(0,0).copy)
 
     keypoints.keypoints.filter {
@@ -33,6 +35,8 @@ fun main() {
     }
 
     Visualization().showImage(displayKeypoints.bufferedImage)
+
+
 
 
     /* val gaussianPyramidBuilder = DifferenceOfGaussiansPyramidBuilder()
