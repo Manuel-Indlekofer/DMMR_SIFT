@@ -2,13 +2,12 @@ package steps
 
 import math.DoubleMatrix
 import model.GaussianPyramid
-import model.Keypoint
 import kotlin.math.*
 
 class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOfGaussiansPyramid) : Step<FilterCandidates.Keypoints, OrientationAssignment.OrientedKeypoints> {
 
     data class OrientedKeypoints(val orientedKeypoints: ArrayList<OrientedKeypoint>) {
-        data class OrientedKeypoint(val oof: Int)
+        data class OrientedKeypoint(val octave: Int, val scale: Int, val x: Int, val y: Int, val interpolatedScale: Double, val interpolatedX: Double, val interpolatedY: Double, val interpolatedValue: Double, val orientationTheta: Double)
     }
 
     private val xGradient = Gradient()
@@ -39,13 +38,20 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
 
 
     override fun process(input: FilterCandidates.Keypoints): OrientedKeypoints {
+
+        computeGradients()
+
+        val result = OrientedKeypoints(ArrayList())
+
         for (keypoint in input.keypoints) {
-            processKeypoint(keypoint)
+            processKeypoint(keypoint)?.let {
+                result.orientedKeypoints.addAll(it)
+            }
         }
-        return OrientedKeypoints(ArrayList())
+        return result
     }
 
-    private fun processKeypoint(keypoint: FilterCandidates.Keypoints.Keypoint): OrientedKeypoints.OrientedKeypoint? {
+    private fun processKeypoint(keypoint: FilterCandidates.Keypoints.Keypoint): ArrayList<OrientedKeypoints.OrientedKeypoint>? {
         if (!(3 * lambdaOrientation * keypoint.interpolatedScale <= keypoint.x && keypoint.x <= dOGPyramid.getImage(keypoint.octave, keypoint.scale).columns - 3.0 * lambdaOrientation * keypoint.interpolatedScale &&
                         3 * lambdaOrientation * keypoint.interpolatedScale <= keypoint.y && keypoint.y <= dOGPyramid.getImage(keypoint.octave, keypoint.scale).rows - 3.0 * lambdaOrientation * keypoint.interpolatedScale)) {
             return null
@@ -64,12 +70,33 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
                 orientationHistogram[binIndex] += contribution
             }
         }
-        return null
+
+        smoothHistogram(orientationHistogram)
+
+        val listOfKeypoints = ArrayList<OrientedKeypoints.OrientedKeypoint>()
+
+        for (index in orientationHistogram.indices) {
+            val previousIndex = (index - 1) % orientationHistogram.size
+            val nextIndex = (index + 1) % orientationHistogram.size
+            if (orientationHistogram[index] > orientationHistogram[previousIndex] && orientationHistogram[index] > orientationHistogram[nextIndex] && orientationHistogram[index] >= 0.8 * orientationHistogram.max()!!) {
+                val theta = 2 * Math.PI * index + Math.PI / numberOfBins * ((orientationHistogram[previousIndex] - orientationHistogram[nextIndex]) / (orientationHistogram[previousIndex] - 2.0 * orientationHistogram[index] + orientationHistogram[nextIndex]))
+                listOfKeypoints.add(OrientedKeypoints.OrientedKeypoint(keypoint.octave, keypoint.scale, keypoint.x, keypoint.y, keypoint.interpolatedScale, keypoint.interpolatedX, keypoint.interpolatedY, keypoint.interpolatedValue, theta))
+            }
+        }
+
+        return listOfKeypoints
     }
 
 
     private fun smoothHistogram(histogram: Array<Double>) {
-
+        for (iteration in 0 until 6) {
+            val tempArray = histogram.copyOf()
+            for (index in histogram.indices) {
+                val previousIndex = (index - 1) % histogram.size
+                val nextIndex = (index + 1) % histogram.size
+                histogram[index] = (histogram[previousIndex] + histogram[index] + histogram[nextIndex]) / 3.0
+            }
+        }
     }
 
 
