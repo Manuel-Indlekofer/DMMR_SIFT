@@ -10,8 +10,8 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
         data class OrientedKeypoint(val octave: Int, val scale: Int, val x: Int, val y: Int, val interpolatedScale: Double, val interpolatedX: Double, val interpolatedY: Double, val interpolatedValue: Double, val orientationTheta: Double)
     }
 
-    private val xGradient = Gradient()
-    private val yGradient = Gradient()
+    val xGradient = Gradient()
+    val yGradient = Gradient()
 
     companion object {
         private const val lambdaOrientation: Double = 1.5
@@ -32,6 +32,14 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
 
         fun getGradient(octave: Int, scale: Int, x: Int, y: Int): Double {
             return gradients[octave][scale][x, y]
+        }
+
+        fun getXDimension(octave: Int, scale: Int): Int {
+            return gradients[octave][scale].columns
+        }
+
+        fun getYDimension(octave: Int, scale: Int): Int {
+            return gradients[octave][scale].rows
         }
 
     }

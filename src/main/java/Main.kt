@@ -24,17 +24,25 @@ fun main() {
 
     val keypoints = FilterCandidates(dOG).process(candidateKeypoints)
 
-    val orientedKeypoints = OrientationAssignment(dOG).process(keypoints)
+    val orientationAssignment = OrientationAssignment(dOG)
 
-    val displayKeypoints = RGBImageArrayProxy(gaussianPyramid.getImage(0,0).copy)
+    val orientedKeypoints = orientationAssignment.process(keypoints)
 
-    keypoints.keypoints.filter {
-        it.octave == 0
-    }.forEach {
-        displayKeypoints[it.x,it.y] = intArrayOf(255,0,0)
+    val keypointDescriptors = KeypointDescriptorConstruction(orientationAssignment.xGradient,orientationAssignment.yGradient).process(orientedKeypoints)
+
+    println("Got a total of ${keypointDescriptors.descriptors.size} descriptors")
+
+
+    val displayImage = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg"))
+
+    for(descriptor in keypointDescriptors.descriptors){
+        val x = descriptor.interpolatedX.toInt()
+        val y = descriptor.interpolatedY.toInt()
+
+        displayImage[x,y] = intArrayOf(0,255,0)
     }
 
-    Visualization().showImage(displayKeypoints.bufferedImage)
+    Visualization().showImage(displayImage.bufferedImage)
 
 
 
