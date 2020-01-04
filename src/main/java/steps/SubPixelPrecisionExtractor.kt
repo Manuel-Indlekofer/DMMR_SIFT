@@ -2,6 +2,7 @@ package steps
 
 import math.DoubleMatrix
 import model.GaussianPyramid
+import org.apache.commons.math3.linear.SingularMatrixException
 import java.lang.Exception
 import kotlin.math.max
 import kotlin.math.pow
@@ -39,8 +40,13 @@ class SubPixelPrecisionExtractor(private val dOGPyramid: GaussianPyramid.Differe
         var interpolatedScale: Double
         do {
             iteration++
-            alpha = calculateOffsetAlpha(DiscreteExtremaExtraction.DiscreteExtrema.Extremum(extremum.octave, currentScale, currentX, currentY))
-            interpolatedValue = calculateInterpolatedValueOmega(DiscreteExtremaExtraction.DiscreteExtrema.Extremum(extremum.octave, currentScale, currentX, currentY))
+
+            try {
+                alpha = calculateOffsetAlpha(DiscreteExtremaExtraction.DiscreteExtrema.Extremum(extremum.octave, currentScale, currentX, currentY))
+                interpolatedValue = calculateInterpolatedValueOmega(DiscreteExtremaExtraction.DiscreteExtrema.Extremum(extremum.octave, currentScale, currentX, currentY))
+            }catch (ex : SingularMatrixException){
+                return null
+            }
 
 
             interpolatedScale = pixelDistance / scaleSpace.minInterPixelDistance * scaleSpace.minBlurSigma * 2.0.pow((alpha[0, 0] + currentScale) / scaleSpace.numberOfScales)

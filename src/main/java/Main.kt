@@ -15,10 +15,24 @@ fun main() {
     val image1descriptors = SiftGenerator().generateKeypoints("C:\\Users\\manue\\Desktop\\test.jpg")
     val image2descriptors = SiftGenerator().generateKeypoints("C:\\Users\\manue\\Desktop\\test2.jpg")
 
+    val keyPointImageA = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg"))
+    val keyPointImageB = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test2.jpg"))
+
+    for(keypoint in image1descriptors.descriptors){
+        keyPointImageA[keypoint.interpolatedX.toInt(),keypoint.interpolatedY.toInt()] = intArrayOf(0,0,255)
+    }
+
+    for(keypoint in image2descriptors.descriptors){
+        keyPointImageB[keypoint.interpolatedX.toInt(),keypoint.interpolatedY.toInt()] = intArrayOf(0,0,255)
+    }
+
+    Visualization().showImage(keyPointImageA.bufferedImage)
+    Visualization().showImage(keyPointImageB.bufferedImage)
 
     val matcher = SiftMatcher()
 
     val result = matcher.match(image1descriptors, image2descriptors)
+
 
     val displayImageA = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg"))
     val displayImageB = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test2.jpg"))
@@ -31,6 +45,8 @@ fun main() {
     for (matchB in result.map { it.second }) {
         displayImageB[matchB.interpolatedX.toInt(), matchB.interpolatedY.toInt()] = intArrayOf(255,0,0)
     }
+
+
 
     Visualization().showImage(displayImageA.bufferedImage)
     Visualization().showImage(displayImageB.bufferedImage)
