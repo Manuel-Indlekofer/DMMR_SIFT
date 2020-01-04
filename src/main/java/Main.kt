@@ -1,8 +1,10 @@
 import imageProcessing.implementation.Normalizer
+import matching.SiftMatcher
 import math.BilinearInterpolation
 import model.DifferenceOfGaussiansPyramidBuilder
 import model.LocalMaximumExtractor
 import model.KeypointSubpixelExtractor
+import sift.SiftGenerator
 import steps.*
 import util.RGBImageArrayProxy
 import visualization.Visualization
@@ -10,41 +12,28 @@ import java.io.File
 
 fun main() {
 
-    val image = Normalizer.normalizeImage(RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg")))
-    val scaleSpace = GaussianScaleSpace()
-    val gaussianPyramid = scaleSpace.process(image)
+    val image1descriptors = SiftGenerator().generateKeypoints("C:\\Users\\manue\\Desktop\\test.jpg")
+    val image2descriptors = SiftGenerator().generateKeypoints("C:\\Users\\manue\\Desktop\\test2.jpg")
 
-    val dOG = DifferenceOfGaussians().process(gaussianPyramid)
-    dOG.forEach {
-        Visualization().showImage(RGBImageArrayProxy(it).bufferedImage)
+
+    val matcher = SiftMatcher()
+
+    val result = matcher.match(image1descriptors, image2descriptors)
+
+    val displayImageA = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg"))
+    val displayImageB = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test2.jpg"))
+
+
+    for (matchA in result.map { it.first }) {
+        displayImageA[matchA.interpolatedX.toInt(),matchA.interpolatedY.toInt()] = intArrayOf(255,0,0)
     }
 
-    val discreteExtrema = DiscreteExtremaExtraction().process(dOG)
-    val candidateKeypoints = SubPixelPrecisionExtractor(dOG, scaleSpace).process(discreteExtrema)
-
-    val keypoints = FilterCandidates(dOG).process(candidateKeypoints)
-
-    val orientationAssignment = OrientationAssignment(dOG)
-
-    val orientedKeypoints = orientationAssignment.process(keypoints)
-
-    val keypointDescriptors = KeypointDescriptorConstruction(orientationAssignment.xGradient,orientationAssignment.yGradient).process(orientedKeypoints)
-
-    println("Got a total of ${keypointDescriptors.descriptors.size} descriptors")
-
-
-    val displayImage = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test.jpg"))
-
-    for(descriptor in keypointDescriptors.descriptors){
-        val x = descriptor.interpolatedX.toInt()
-        val y = descriptor.interpolatedY.toInt()
-
-        displayImage[x,y] = intArrayOf(0,255,0)
+    for (matchB in result.map { it.second }) {
+        displayImageB[matchB.interpolatedX.toInt(), matchB.interpolatedY.toInt()] = intArrayOf(255,0,0)
     }
 
-    Visualization().showImage(displayImage.bufferedImage)
-
-
+    Visualization().showImage(displayImageA.bufferedImage)
+    Visualization().showImage(displayImageB.bufferedImage)
 
 
     /* val gaussianPyramidBuilder = DifferenceOfGaussiansPyramidBuilder()

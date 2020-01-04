@@ -24,5 +24,9 @@ class Visualization {
         label.icon = ImageIcon(bufferedImage)
     }
 
+    fun showMatches(bufferedImageA: BufferedImage, bufferedImageB: BufferedImage){
+
+    }
+
 
 }

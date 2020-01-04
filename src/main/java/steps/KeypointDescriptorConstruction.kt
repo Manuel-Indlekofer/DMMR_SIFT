@@ -32,7 +32,7 @@ class KeypointDescriptorConstruction(private val xGradient: OrientationAssignmen
 
         val imageXRange = 0 until xGradient.getXDimension(keypoint.octave, keypoint.scale)
 
-        val imageYRange = 0 until xGradient.getXDimension(keypoint.octave, keypoint.scale)
+        val imageYRange = 0 until xGradient.getYDimension(keypoint.octave, keypoint.scale)
 
         val targetXRange = ((keypoint.interpolatedX - sqrt(2.0) * lambdaDescription * keypoint.interpolatedScale * (numberOfHistograms + 1.0) / numberOfHistograms) / interPixelDistance).roundToInt()..((keypoint.interpolatedX + sqrt(2.0) * lambdaDescription * keypoint.interpolatedScale * (numberOfHistograms + 1) / numberOfHistograms) / interPixelDistance).roundToInt()
         val targetYRange = ((keypoint.interpolatedY - sqrt(2.0) * lambdaDescription * keypoint.interpolatedScale * (numberOfHistograms + 1.0) / numberOfHistograms) / interPixelDistance).roundToInt()..((keypoint.interpolatedY + sqrt(2.0) * lambdaDescription * keypoint.interpolatedScale * (numberOfHistograms + 1) / numberOfHistograms) / interPixelDistance).roundToInt()
