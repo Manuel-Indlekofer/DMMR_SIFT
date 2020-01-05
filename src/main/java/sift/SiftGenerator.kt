@@ -18,7 +18,7 @@ class SiftGenerator {
 
         val keypoints = FilterCandidates(dOG).process(candidateKeypoints)
 
-        val orientationAssignment = OrientationAssignment(dOG)
+        val orientationAssignment = OrientationAssignment(gaussianPyramid)
 
         val orientedKeypoints = orientationAssignment.process(keypoints)
 

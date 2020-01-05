@@ -25,8 +25,7 @@ class FilterCandidates(private val dOGPyramid: GaussianPyramid.DifferenceOfGauss
         filteredKeypoints.filter {
             val hessian = calculateHessian(it)
             hessian.trace.pow(2.0) / hessian.determinant < (10 + 1.0).pow(2.0) / 10.0
-        }
-        filteredKeypoints.map { candidateKeypoint ->
+        }.map { candidateKeypoint ->
             Keypoints.Keypoint(candidateKeypoint.octave, candidateKeypoint.scale, candidateKeypoint.x, candidateKeypoint.y, candidateKeypoint.interpolatedScale, candidateKeypoint.interpolatedX, candidateKeypoint.interpolatedY, candidateKeypoint.interpolatedValue)
         }.toCollection(result.keypoints)
 

@@ -1,11 +1,5 @@
-import imageProcessing.implementation.Normalizer
 import matching.SiftMatcher
-import math.BilinearInterpolation
-import model.DifferenceOfGaussiansPyramidBuilder
-import model.LocalMaximumExtractor
-import model.KeypointSubpixelExtractor
 import sift.SiftGenerator
-import steps.*
 import util.RGBImageArrayProxy
 import visualization.Visualization
 import java.io.File
@@ -19,11 +13,11 @@ fun main() {
     val keyPointImageB = RGBImageArrayProxy(File("C:\\Users\\manue\\Desktop\\test2.jpg"))
 
     for(keypoint in image1descriptors.descriptors){
-        keyPointImageA[keypoint.interpolatedX.toInt(),keypoint.interpolatedY.toInt()] = intArrayOf(0,0,255)
+        keyPointImageA[keypoint.interpolatedX.toInt(),keypoint.interpolatedY.toInt()] = intArrayOf(255,0,0)
     }
 
     for(keypoint in image2descriptors.descriptors){
-        keyPointImageB[keypoint.interpolatedX.toInt(),keypoint.interpolatedY.toInt()] = intArrayOf(0,0,255)
+        keyPointImageB[keypoint.interpolatedX.toInt(),keypoint.interpolatedY.toInt()] = intArrayOf(255,0,0)
     }
 
     Visualization().showImage(keyPointImageA.bufferedImage)
@@ -48,30 +42,5 @@ fun main() {
 
 
 
-    Visualization().showImage(displayImageA.bufferedImage)
-    Visualization().showImage(displayImageB.bufferedImage)
-
-
-    /* val gaussianPyramidBuilder = DifferenceOfGaussiansPyramidBuilder()
-     val gaussianPyramid = gaussianPyramidBuilder.calculateGaussianPyramid(image)
-     val result = LocalMaximumExtractor().extractMaximumValues(gaussianPyramid)
-     KeypointSubpixelExtractor(gaussianPyramid, result, gaussianPyramidBuilder.sigmaLevels).process()
-
-     for (octave in result.indices) {
-         for (scale in result[octave].indices) {
-             for (x in result[octave][scale].indices) {
-                 for (y in result[octave][scale][x].indices) {
-                     if (result[octave][scale][x][y]) {
-                         gaussianPyramid[octave][scale][x, y] = 1.0
-                     }
-                 }
-             }
-         }
-     }
-
-     for (octave in gaussianPyramid.indices) {
-         for (scale in gaussianPyramid.indices) {
-             Visualization().showImage(RGBImageArrayProxy(gaussianPyramid[octave][scale]).bufferedImage)
-         }
-     }*/
+    Visualization().showMatches(displayImageA.bufferedImage,displayImageB.bufferedImage,result)
 }

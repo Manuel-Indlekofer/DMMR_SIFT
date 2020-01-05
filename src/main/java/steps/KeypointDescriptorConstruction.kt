@@ -52,13 +52,13 @@ class KeypointDescriptorConstruction(private val xGradient: OrientationAssignmen
         for (x in targetXRange) {
             for (y in targetYRange) {
 
-                val normalizedX = ((x * interPixelDistance - keypoint.interpolatedX) * cos(keypoint.orientationTheta + (y * interPixelDistance - keypoint.interpolatedY) * sin(keypoint.orientationTheta))) / keypoint.interpolatedScale
+                val normalizedX = ((x * interPixelDistance - keypoint.interpolatedX) * cos(keypoint.orientationTheta) + (y * interPixelDistance - keypoint.interpolatedY) * sin(keypoint.orientationTheta)) / keypoint.interpolatedScale
                 val normalizedY = (-(x * interPixelDistance - keypoint.interpolatedX) * sin(keypoint.orientationTheta) + (y * interPixelDistance - keypoint.interpolatedY) * cos(keypoint.orientationTheta)) / keypoint.interpolatedScale
 
 
                 if (max(abs(normalizedX), abs(normalizedY)) < lambdaDescription * (numberOfHistograms + 1.0) / numberOfHistograms) {
                     val normalizedOrientation = atan2(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y), yGradient.getGradient(keypoint.octave, keypoint.scale, x, y)) - abs(keypoint.orientationTheta.rem(2 * PI))
-                    val sampleContribution = exp(-(sqrt((x * interPixelDistance - keypoint.x).pow(2.0) + (y * interPixelDistance - keypoint.y).pow(2.0)).pow(2.0) / 2 * (lambdaDescription * keypoint.interpolatedScale).pow(2.0))) * sqrt(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0) + yGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0))
+                    val sampleContribution = exp(-(sqrt((x * interPixelDistance - keypoint.interpolatedX).pow(2.0) + (y * interPixelDistance - keypoint.interpolatedY).pow(2.0)).pow(2.0) / (2 * (lambdaDescription * keypoint.interpolatedScale).pow(2.0)))) * sqrt(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0) + yGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0))
 
 
                     for (i in 1..numberOfHistograms) {

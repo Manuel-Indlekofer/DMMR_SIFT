@@ -4,7 +4,7 @@ import math.DoubleMatrix
 import model.GaussianPyramid
 import kotlin.math.*
 
-class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOfGaussiansPyramid) : Step<FilterCandidates.Keypoints, OrientationAssignment.OrientedKeypoints> {
+class OrientationAssignment(private val gaussianPyramid: GaussianPyramid) : Step<FilterCandidates.Keypoints, OrientationAssignment.OrientedKeypoints> {
 
     data class OrientedKeypoints(val orientedKeypoints: ArrayList<OrientedKeypoint>) {
         data class OrientedKeypoint(val octave: Int, val scale: Int, val x: Int, val y: Int, val interpolatedScale: Double, val interpolatedX: Double, val interpolatedY: Double, val interpolatedValue: Double, val orientationTheta: Double)
@@ -20,9 +20,9 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
 
     inner class Gradient {
 
-        private val gradients: Array<Array<DoubleMatrix>> = Array(dOGPyramid.numberOfOctaves) { octave ->
-            Array(dOGPyramid.numberOfScales) { scale ->
-                DoubleMatrix(dOGPyramid.getImage(octave, scale).rows, dOGPyramid.getImage(octave, scale).columns)
+        private val gradients: Array<Array<DoubleMatrix>> = Array(gaussianPyramid.numberOfOctaves) { octave ->
+            Array(gaussianPyramid.numberOfScales) { scale ->
+                DoubleMatrix(gaussianPyramid.getImage(octave, scale).rows, gaussianPyramid.getImage(octave, scale).columns)
             }
         }
 
@@ -66,8 +66,8 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
 
         val targetXRange = ((keypoint.interpolatedX - 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()..((keypoint.interpolatedX + 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()
         val targetYRange = ((keypoint.interpolatedY - 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()..((keypoint.interpolatedY + 3.0 * lambdaOrientation * keypoint.interpolatedScale) / interPixelDistance).roundToInt()
-        val imageXRange = 0 until dOGPyramid.getImage(keypoint.octave, keypoint.scale).columns
-        val imageYRange = 0 until dOGPyramid.getImage(keypoint.octave, keypoint.scale).rows
+        val imageXRange = 0 until gaussianPyramid.getImage(keypoint.octave, keypoint.scale).columns
+        val imageYRange = 0 until gaussianPyramid.getImage(keypoint.octave, keypoint.scale).rows
         if (targetXRange.first !in imageXRange || targetXRange.last !in imageXRange || targetYRange.first !in imageYRange || targetYRange.last !in imageYRange) {
             return null
         }
@@ -78,15 +78,7 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
 
         for (x in targetXRange) {
             for (y in targetYRange) {
-                println("x is $x")
-                println("y is $y")
-                println("interpolated x is ${keypoint.interpolatedX}")
-                println("interpolated y is ${keypoint.interpolatedY}")
-                println("keypoint y is ${keypoint.y}")
-                println("keypoint x is ${keypoint.x}")
-                println("imageX is ${dOGPyramid.getImage(keypoint.octave, keypoint.scale).columns}")
-                println("imageY is ${dOGPyramid.getImage(keypoint.octave, keypoint.scale).rows}")
-                val contribution = exp(-(sqrt((x * interPixelDistance - keypoint.x).pow(2.0) + (y * interPixelDistance - keypoint.y).pow(2.0)).pow(2.0) / 2 * (lambdaOrientation * keypoint.interpolatedScale).pow(2.0))) * sqrt(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0) + yGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0))
+                val contribution = exp(-(sqrt((x * interPixelDistance - keypoint.interpolatedX).pow(2.0) + (y * interPixelDistance - keypoint.interpolatedY).pow(2.0)).pow(2.0) / (2 * (lambdaOrientation * keypoint.interpolatedScale).pow(2.0)))) * sqrt(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0) + yGradient.getGradient(keypoint.octave, keypoint.scale, x, y).pow(2.0))
                 val binIndex = abs((numberOfBins.toDouble() / (2.0 * Math.PI)) * (atan2(xGradient.getGradient(keypoint.octave, keypoint.scale, x, y), yGradient.getGradient(keypoint.octave, keypoint.scale, x, y))).rem(2.0 * Math.PI)).roundToInt()
                 orientationHistogram[binIndex] += contribution
             }
@@ -100,7 +92,7 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
             val previousIndex = abs((index - 1).rem(orientationHistogram.size))
             val nextIndex = abs((index + 1).rem(orientationHistogram.size))
             if (orientationHistogram[index] > orientationHistogram[previousIndex] && orientationHistogram[index] > orientationHistogram[nextIndex] && orientationHistogram[index] >= 0.8 * orientationHistogram.max()!!) {
-                val theta = 2 * Math.PI * index + Math.PI / numberOfBins * ((orientationHistogram[previousIndex] - orientationHistogram[nextIndex]) / (orientationHistogram[previousIndex] - 2.0 * orientationHistogram[index] + orientationHistogram[nextIndex]))
+                val theta = (2 * PI * (index - 1) / numberOfBins) + Math.PI / numberOfBins * ((orientationHistogram[previousIndex] - orientationHistogram[nextIndex]) / (orientationHistogram[previousIndex] - 2.0 * orientationHistogram[index] + orientationHistogram[nextIndex]))
                 listOfKeypoints.add(OrientedKeypoints.OrientedKeypoint(keypoint.octave, keypoint.scale, keypoint.x, keypoint.y, keypoint.interpolatedScale, keypoint.interpolatedX, keypoint.interpolatedY, keypoint.interpolatedValue, theta))
             }
         }
@@ -122,12 +114,12 @@ class OrientationAssignment(private val dOGPyramid: GaussianPyramid.DifferenceOf
 
 
     private fun computeGradients() {
-        for (octave in 0 until dOGPyramid.numberOfOctaves) {
-            for (scale in 0 until dOGPyramid.numberOfScales) {
-                for (x in 1 until dOGPyramid.getImage(octave, scale).columns - 1) {
-                    for (y in 1 until dOGPyramid.getImage(octave, scale).rows - 1) {
-                        xGradient.setGradient(octave, scale, x, y, (dOGPyramid.getImage(octave, scale)[x + 1, y] - dOGPyramid.getImage(octave, scale)[x - 1, y]) / 2.0)
-                        yGradient.setGradient(octave, scale, x, y, (dOGPyramid.getImage(octave, scale)[x, y + 1] - dOGPyramid.getImage(octave, scale)[x, y - 1]) / 2.0)
+        for (octave in 0 until gaussianPyramid.numberOfOctaves) {
+            for (scale in 0 until gaussianPyramid.numberOfScales) {
+                for (x in 1 until gaussianPyramid.getImage(octave, scale).columns - 1) {
+                    for (y in 1 until gaussianPyramid.getImage(octave, scale).rows - 1) {
+                        xGradient.setGradient(octave, scale, x, y, (gaussianPyramid.getImage(octave, scale)[x + 1, y] - gaussianPyramid.getImage(octave, scale)[x - 1, y]) / 2.0)
+                        yGradient.setGradient(octave, scale, x, y, (gaussianPyramid.getImage(octave, scale)[x, y + 1] - gaussianPyramid.getImage(octave, scale)[x, y - 1]) / 2.0)
                     }
                 }
             }

@@ -88,15 +88,15 @@ class SubPixelPrecisionExtractor(private val dOGPyramid: GaussianPyramid.Differe
     }
 
     private fun calculateInterpolatedValueOmega(extremum: DiscreteExtremaExtraction.DiscreteExtrema.Extremum): Double {
-        val hessian = calculateHessian(extremum)
+        val alpha = calculateOffsetAlpha(extremum)
         val gradient = calculateGradient(extremum)
-        val temp = gradient.transposed * hessian.inverse * gradient
+        val temp = alpha.transposed * gradient
         if (temp.columns != 1 && temp.rows != 1) {
             throw Exception("Invalid matrix format!")
         }
         val result = temp[0, 0]
 
-        return dOGPyramid.getImage(extremum.octave, extremum.scale)[extremum.x, extremum.y] - 0.5 * result
+        return dOGPyramid.getImage(extremum.octave, extremum.scale)[extremum.x, extremum.y] + 0.5 * result
     }
 
     private fun calculateHessian(extremum: DiscreteExtremaExtraction.DiscreteExtrema.Extremum): DoubleMatrix {
