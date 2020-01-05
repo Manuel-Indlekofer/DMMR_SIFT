@@ -71,7 +71,7 @@ class KeypointDescriptorConstruction(private val xGradient: OrientationAssignmen
                             }
 
                             for (k in 1..numberOfOrientations) {
-                                if (abs(normalizedOrientation.pow(k) - normalizedOrientation.rem(2 * PI)) <= (2 * PI) / numberOfOrientations) {
+                                if (abs((2*PI*(k-1)/ numberOfOrientations) - abs(normalizedOrientation.rem(2 * PI))) < (2 * PI) / numberOfOrientations) {
                                     weightedHistograms[i - 1][j - 1][k - 1] += (1 - numberOfHistograms / (2 * lambdaDescription) * abs(normalizedX - (i - (1 + numberOfHistograms) / 2.0) * (2 * lambdaDescription) / numberOfHistograms)) * (1 - numberOfHistograms / (2 * lambdaDescription) * abs(normalizedY - (j - (1 + numberOfHistograms) / 2.0) * (2 * lambdaDescription) / numberOfHistograms)) * (1 - numberOfOrientations / (2 * PI) * abs(normalizedOrientation - (2 * PI * (k - 1) / numberOfOrientations.toDouble()).rem(2 * PI))) * sampleContribution
                                 }
                             }
