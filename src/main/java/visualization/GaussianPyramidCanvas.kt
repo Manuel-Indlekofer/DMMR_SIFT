@@ -6,7 +6,19 @@ import java.awt.Graphics
 import javax.swing.JComponent
 import kotlin.math.roundToInt
 
-class GaussianPyramidCanvas(private val gaussianPyramid: GaussianPyramid) : JComponent() {
+class GaussianPyramidCanvas(inputgaussianPyramid: GaussianPyramid, imageMultiplicator: Double = 1.0) : JComponent() {
+
+
+    private val gaussianPyramid: GaussianPyramid = GaussianPyramid(inputgaussianPyramid.numberOfOctaves, inputgaussianPyramid.numberOfScales)
+
+    init {
+        for (octave in 0 until gaussianPyramid.numberOfOctaves) {
+            for (scale in 0 until gaussianPyramid.numberOfScales) {
+                gaussianPyramid.setImage(octave, scale, inputgaussianPyramid.getImage(octave, scale).timesScalar(imageMultiplicator))
+            }
+        }
+    }
+
 
     private val imageMultiplicatorY: Double
         get() {
@@ -14,6 +26,7 @@ class GaussianPyramidCanvas(private val gaussianPyramid: GaussianPyramid) : JCom
             val totalHeight = gaussianPyramid.numberOfScales * largestImageHeight
             return super.getHeight().toDouble() / totalHeight
         }
+
     private val imageMultiplicatorX: Double
         get() {
             var totalWidth = 0

@@ -99,6 +99,11 @@ class DoubleMatrix {
         matrix.setEntry(j, i, value)
     }
 
+    fun timesScalar(scalar: Double): DoubleMatrix {
+        val result = DoubleMatrix(matrix)
+        return DoubleMatrix(result.matrix.scalarMultiply(scalar))
+    }
+
     fun timesComponentWise(second: DoubleMatrix): DoubleMatrix {
         val result = DoubleMatrix(second)
         for (i in 0 until result.rows) {

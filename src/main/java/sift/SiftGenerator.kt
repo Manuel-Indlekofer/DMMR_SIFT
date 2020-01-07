@@ -21,7 +21,7 @@ class SiftGenerator(private val visualizeSteps: Boolean = true) {
         }
         val dOG = DifferenceOfGaussians().process(gaussianPyramid)
         if(visualizeSteps){
-            Visualization().showStepCanvas(GaussianPyramidCanvas(dOG),"Difference of Gaussians Scale-Space")
+            Visualization().showStepCanvas(GaussianPyramidCanvas(dOG,20.0),"Difference of Gaussians Scale-Space")
         }
         val discreteExtrema = DiscreteExtremaExtraction().process(dOG)
         val candidateKeypoints = SubPixelPrecisionExtractor(dOG, scaleSpace).process(discreteExtrema)

@@ -27,7 +27,7 @@ class RGBImageArrayProxy {
         for (x in 0 until matrix.columns) {
             for (y in 0 until matrix.rows) {
                 for (i in 0 until 3) {
-                    val pixelValue = abs((matrix[x, y] * 255).toInt())
+                    val pixelValue = abs((matrix[x, y] * 255).toInt()).coerceIn(0,255)
                     raster.setPixel(x, y, intArrayOf(pixelValue, pixelValue, pixelValue))
                 }
             }
