@@ -1,8 +1,10 @@
 package visualization
 
 import steps.KeypointDescriptorConstruction
+import java.awt.Canvas
 import java.awt.image.BufferedImage
 import javax.swing.ImageIcon
+import javax.swing.JComponent
 import javax.swing.JFrame
 import javax.swing.JLabel
 
@@ -28,5 +30,12 @@ class Visualization {
         frame.isVisible = true
     }
 
+    fun showStepCanvas(canvas: JComponent, title: String) {
+        val frame: JFrame = JFrame(title)
+        frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+        frame.setSize(800, 400)
+        frame.add(canvas)
+        frame.isVisible = true
+    }
 
 }
