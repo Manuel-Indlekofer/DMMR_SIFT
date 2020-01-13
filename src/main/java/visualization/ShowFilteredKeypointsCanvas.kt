@@ -1,12 +1,12 @@
 package visualization
 
-import steps.SubPixelPrecisionExtractor
+import steps.FilterCandidates
 import util.copy
 import java.awt.Graphics
 import java.awt.image.BufferedImage
 import javax.swing.JComponent
 
-open class ShowRefinedExtremaCanvas(extrema: SubPixelPrecisionExtractor.CandidateKeypoints, inputImage: BufferedImage) : JComponent() {
+class ShowFilteredKeypointsCanvas(extrema : FilterCandidates.Keypoints, inputImage: BufferedImage) : JComponent() {
 
     private val image = inputImage.copy()
 
@@ -15,7 +15,7 @@ open class ShowRefinedExtremaCanvas(extrema: SubPixelPrecisionExtractor.Candidat
     }
 
     init {
-        for (extremum in extrema.candidates) {
+        for (extremum in extrema.keypoints) {
             drawCross(extremum)
         }
     }
@@ -25,7 +25,7 @@ open class ShowRefinedExtremaCanvas(extrema: SubPixelPrecisionExtractor.Candidat
         g.drawImage(image, 0, 0, this)
     }
 
-    private fun drawCross(candidateKeypoint: SubPixelPrecisionExtractor.CandidateKeypoints.CandidateKeypoint) {
+    private fun drawCross(candidateKeypoint: FilterCandidates.Keypoints.Keypoint) {
         val x = candidateKeypoint.interpolatedX.toInt()
         val y = candidateKeypoint.interpolatedY.toInt()
         for (crossX in x - CROSS_LENGTH / 2..x + CROSS_LENGTH / 2) {

@@ -4,6 +4,7 @@ import imageProcessing.implementation.Normalizer
 import steps.*
 import util.RGBImageArrayProxy
 import visualization.GaussianPyramidCanvas
+import visualization.ShowFilteredKeypointsCanvas
 import visualization.ShowRefinedExtremaCanvas
 import visualization.Visualization
 import java.io.File
@@ -31,6 +32,10 @@ class SiftGenerator(private val visualizeSteps: Boolean = true) {
         }
 
         val keypoints = FilterCandidates(dOG).process(candidateKeypoints)
+
+        if(visualizeSteps){
+            Visualization().showStepCanvas(ShowFilteredKeypointsCanvas(keypoints,rawImage.bufferedImage),"Filtered Extrema Points")
+        }
 
         val orientationAssignment = OrientationAssignment(gaussianPyramid)
 

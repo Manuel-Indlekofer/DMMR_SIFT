@@ -17,7 +17,6 @@ class SubPixelPrecisionExtractor(private val dOGPyramid: GaussianPyramid.Differe
     override fun process(input: DiscreteExtremaExtraction.DiscreteExtrema): CandidateKeypoints {
         val resultList = CandidateKeypoints(ArrayList())
         for (extremum in input.extrema) {
-            println("[SubPixelPrecisionExtractor] processing discrete extremum of octave:${extremum.octave} scale:${extremum.scale} x:${extremum.x} y:${extremum.y}")
             val result = processExtremum(extremum)
             result?.let {
                 resultList.candidates.add(it)

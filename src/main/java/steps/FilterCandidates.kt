@@ -21,7 +21,6 @@ class FilterCandidates(private val dOGPyramid: GaussianPyramid.DifferenceOfGauss
         }
 
         //edge filtering
-
         filteredKeypoints.filter {
             val hessian = calculateHessian(it)
             hessian.trace.pow(2.0) / hessian.determinant < (10 + 1.0).pow(2.0) / 10.0
@@ -29,7 +28,7 @@ class FilterCandidates(private val dOGPyramid: GaussianPyramid.DifferenceOfGauss
             Keypoints.Keypoint(candidateKeypoint.octave, candidateKeypoint.scale, candidateKeypoint.x, candidateKeypoint.y, candidateKeypoint.interpolatedScale, candidateKeypoint.interpolatedX, candidateKeypoint.interpolatedY, candidateKeypoint.interpolatedValue)
         }.toCollection(result.keypoints)
 
-        println("[KeypointFilter] found a total of ${result.keypoints.size} keypoints!")
+        println("\u001B[33m [KeypointFilter] \u001B[0m found a total of ${result.keypoints.size} keypoints!")
         return result
     }
 

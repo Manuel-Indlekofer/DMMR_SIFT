@@ -46,7 +46,7 @@ class DiscreteExtremaExtraction : Step<GaussianPyramid.DifferenceOfGaussiansPyra
             }
         }
 
-        println("[DiscreteExtremaExtraction] Found a total of ${extrema.extrema.size} possible keypoints!")
+        println("\u001B[35m [DiscreteExtremaExtraction] \u001B[0m Found a total of ${extrema.extrema.size} possible keypoints!")
         return extrema
     }
 }
