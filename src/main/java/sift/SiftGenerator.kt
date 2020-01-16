@@ -3,10 +3,7 @@ package sift
 import imageProcessing.implementation.Normalizer
 import steps.*
 import util.RGBImageArrayProxy
-import visualization.GaussianPyramidCanvas
-import visualization.ShowFilteredKeypointsCanvas
-import visualization.ShowRefinedExtremaCanvas
-import visualization.Visualization
+import visualization.*
 import java.io.File
 
 class SiftGenerator(private val visualizeSteps: Boolean = true) {
@@ -40,6 +37,10 @@ class SiftGenerator(private val visualizeSteps: Boolean = true) {
         val orientationAssignment = OrientationAssignment(gaussianPyramid)
 
         val orientedKeypoints = orientationAssignment.process(keypoints)
+
+        if(visualizeSteps){
+            Visualization().showStepCanvas(ShowRotationCanvas(orientedKeypoints, rawImage.bufferedImage),"Orientation Assignment")
+        }
 
         return KeypointDescriptorConstruction(orientationAssignment.xGradient, orientationAssignment.yGradient).process(orientedKeypoints)
     }
